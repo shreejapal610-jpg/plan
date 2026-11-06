@@ -1,0 +1,36 @@
+ body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: sans-serif;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #444;
+      transition: background 1s;
+    }
+    body.clear  { background: linear-gradient(#4facfe, #00f2fe); }
+    body.cloudy { background: linear-gradient(#757f9a, #d7dde8); }
+    body.rain   { background: linear-gradient(#373b44, #4286f4); }
+    body.snow   { background: linear-gradient(#e6dada, #274046); }
+    body.storm  { background: linear-gradient(#0f2027, #2c5364); }
+    body.night  { background: linear-gradient(#0f0c29, #302b63); }
+
+.itinerary {
+    background-color: #a8a7a7;
+    left: 0px;
+    border: 2px solid #fffefe;
+    opacity:0.6;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 600px;
+    justify-content: left;
+   
+   
+   
+}
+
+.info{
+    color: white;
+    margin-left: 500px;
+}
