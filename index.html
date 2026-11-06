@@ -1,0 +1,169 @@
+
+
+    <!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Weather Background</title>
+  <style>
+   
+  </style>
+</head>
+<body>
+<div class="itinerary" style="color: black;">
+    <h1>ITINERARY</h1>
+    <div class="day">
+        <h2>Day <input type="number" style="width: 30px; height: 20px;"> 
+          <button onclick="addday()">new day...</button></h2>
+       
+     <input type="task" style="width: 200px;" placeholder="Enter task" >
+    <p><button onclick="addTask()">+</button>
+     <button onclick="removeTask()">-</button><p>
+    </div> 
+    </div>
+
+
+  <h1 id="info">Loading weather...</h1>
+
+  <script>
+    function getWeatherClass(code, isDay) {
+      if (!isDay && code <= 3) return "night";
+      if (code === 0) return "clear";
+      if (code <= 48) return "cloudy";
+      if (code <= 67 || (code >= 80 && code <= 82)) return "rain";
+      if (code <= 77 || code === 85 || code === 86) return "snow";
+      if (code >= 95) return "storm";
+     
+    }
+
+    async function loadWeather(lat, lon) {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,is_day`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const { temperature_2m, weather_code, is_day } = data.current;
+
+      document.body.className = getWeatherClass(weather_code, is_day);
+      document.getElementById("info").textContent = `${temperature_2m}°C`;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      pos => loadWeather(pos.coords.latitude, pos.coords.longitude),
+      () => loadWeather(22.59, 88.31) // fallback location if user says no
+    );
+  </script>
+
+  <script>
+    function addday() {
+      const dayDiv = document.createElement("div");
+      dayDiv.className = "day";
+      dayDiv.innerHTML = `
+        <h2>Day <input type="number" style="width: 30px; height: 20px;"> 
+          <button onclick="addday()">new day...</button></h2>
+        <input type="task" style="width: 200px;" placeholder="Enter task" >
+        <p><button onclick="addTask()">+</button>
+         <button onclick="removeTask()">-</button><p>
+      `;
+      document.querySelector(".itinerary").appendChild(dayDiv);
+    }
+
+    function addTask() {
+  const taskInput = document.createElement("input");
+  taskInput.type = "text";
+  taskInput.className = "task";
+  taskInput.style.width = "200px";
+  taskInput.placeholder = "Enter task";
+  document.querySelector(".day").appendChild(taskInput);
+}
+
+function removeTask() {
+  const tasks = document.querySelectorAll(".day .task");
+  if (tasks.length > 0) {
+    tasks[tasks.length - 1].remove();
+  }
+}
+  </script>
+
+  <script>
+  const KEY = 'itinerary';
+
+  // ---------- build UI ----------
+  function createDay(dayNum = '', tasks = ['']) {
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'day';
+    dayDiv.innerHTML = `
+      <h2>Day <input type="number" class="daynum" style="width: 40px; height: 20px;">
+        <button onclick="addday()">new day...</button></h2>
+      <div class="tasks"></div>
+      <p><button onclick="addTask(this)">+</button>
+         <button onclick="removeTask(this)">-</button></p>
+    `;
+    dayDiv.querySelector('.daynum').value = dayNum;
+    tasks.forEach(t => addTaskTo(dayDiv, t));
+    return dayDiv;
+  }
+
+  function addTaskTo(dayDiv, text = '') {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'task';
+    input.style.width = '200px';
+    input.style.display = 'block';
+    input.placeholder = 'Enter task';
+    input.value = text;
+    dayDiv.querySelector('.tasks').appendChild(input);
+  }
+
+  function addday() {
+    document.querySelector('.itinerary').appendChild(createDay());
+    save();
+  }
+
+  function addTask(btn) {
+    addTaskTo(btn.closest('.day'));
+    save();
+  }
+
+  function removeTask(btn) {
+    const tasks = btn.closest('.day').querySelectorAll('.task');
+    if (tasks.length > 0) tasks[tasks.length - 1].remove();
+    save();
+  }
+
+  // ---------- save / load ----------
+  function save() {
+    const data = [...document.querySelectorAll('.day')].map(day => ({
+      day: day.querySelector('.daynum').value,
+      tasks: [...day.querySelectorAll('.task')].map(t => t.value)
+    }));
+    try {
+      localStorage.setItem(KEY, JSON.stringify(data));
+    } catch (e) {
+      console.error('Could not save', e);
+    }
+  }
+
+  function load() {
+    let data = [];
+    try {
+      data = JSON.parse(localStorage.getItem(KEY) || '[]');
+    } catch (e) {}
+
+    const container = document.querySelector('.itinerary');
+    container.querySelectorAll('.day').forEach(d => d.remove()); // clear starter day
+
+    if (data.length === 0) data = [{ day: '', tasks: [''] }];
+    data.forEach(d => container.appendChild(createDay(d.day, d.tasks)));
+  }
+
+  // save whenever the user types in any field
+  document.querySelector('.itinerary').addEventListener('input', save);
+
+  load();
+</script>
+
+    
+    </body>
+    
+    
+</html>
